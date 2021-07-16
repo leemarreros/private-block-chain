@@ -41,7 +41,8 @@ class Block {
       var auxHash = self.hash;
       self.hash = null;
       // Recalculate the hash of the Block
-      var auxHashRecalc = SHA256(JSON.stringify(auxHash)).toString();
+      var auxHashRecalc = SHA256(JSON.stringify(self)).toString();
+      self.hash = auxHashRecalc
       // Comparing if the hashes changed
       var areHashEqual = auxHashRecalc === auxHash;
       // Returning the Block is not valid

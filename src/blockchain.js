@@ -77,7 +77,15 @@ class Blockchain {
         self.chain.push(block);
         self.height++;
       }
-      resolve(block);
+
+      // validates chain after a block is pushed to blockchain
+      var listOfErrors = await self.validateChain();
+      if (listOfErrors.length === 0) {
+        resolve(block);
+      } else {
+        self.chain.pop();
+        resolve(new Error(listOfErrors));
+      }
     });
   }
 
@@ -160,6 +168,7 @@ class Blockchain {
   getBlockByHeight(height) {
     let self = this;
     return new Promise((resolve, reject) => {
+      if (height > self.chain.length - 1) resolve(false);
       let block = self.chain.filter((block) => block.height === height);
       if (block.length === 0) reject(new Error("Hash not found"));
       resolve(block[0]);
@@ -199,8 +208,8 @@ class Blockchain {
         // validating blocks
         var isValid = await block.validate();
         if (!isValid)
-        errorLog.push(`Block number ${block.height} is not valid`);
-        
+          errorLog.push(`Block number ${block.height} is not valid`);
+
         if (ix === 0) return;
         // validating previousHash
         var prevBlockHash = self.chain[ix - 1].hash;
@@ -210,7 +219,7 @@ class Blockchain {
             `Block number ${block.height} do not match previous block hash`
           );
       });
-      resolve(errorLog.length === 0 ? true : errorLog);
+      resolve(errorLog);
     });
   }
 }
